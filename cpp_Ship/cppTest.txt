@@ -1,0 +1,79 @@
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <vector>
+
+const int BOARD_SIZE = 5;
+const char EMPTY = '-';
+const char SHIP = 'S';
+const char HIT = 'X';
+const char MISS = 'O';
+
+void printBoard(const std::vector<std::vector<char>> &board, bool showShips) {
+    std::cout << "  1 2 3 4 5\n";
+    for (int i = 0; i < BOARD_SIZE; ++i) {
+        std::cout << char('A' + i) << " ";
+        for (int j = 0; j < BOARD_SIZE; ++j) {
+            if (board[i][j] == SHIP && !showShips) {
+                std::cout << EMPTY << " ";
+            } else {
+                std::cout << board[i][j] << " ";
+            }
+        }
+        std::cout << "\n";
+    }
+}
+
+int main() {
+    srand(time(0));
+
+    std::vector<std::vector<char>> board(BOARD_SIZE, std::vector<char>(BOARD_SIZE, EMPTY));
+    int shipRow = rand() % BOARD_SIZE;
+    int shipCol = rand() % BOARD_SIZE;
+    board[shipRow][shipCol] = SHIP;
+
+    int attempts = 0;
+    const int MAX_ATTEMPTS = 10;
+    bool shipSunk = false;
+
+    std::cout << "Hoşgeldiniz! Savaş Gemileri oyununda gizli bir gemiyi batırmaya çalışacaksınız.\n";
+    std::cout << "Tahtanız 5x5 boyutundadır (A1, B2 gibi) ve 10 deneme hakkınız var.\n";
+
+    while (attempts < MAX_ATTEMPTS && !shipSunk) {
+        printBoard(board, false);
+        std::cout << "Hamlenizi yapın (ör. A1, B2): ";
+
+        std::string move;
+        std::cin >> move;
+
+        if (move.length() != 2 ||
+            move[0] < 'A' || move[0] >= 'A' + BOARD_SIZE ||
+            move[1] < '1' || move[1] >= '1' + BOARD_SIZE) {
+            std::cout << "Geçersiz hamle, lütfen tekrar deneyin.\n";
+            continue;
+        }
+
+        int row = move[0] - 'A';
+        int col = move[1] - '1';
+        attempts++;
+
+        if (board[row][col] == SHIP) {
+            std::cout << "Tebrikler! Gemiyi batırdınız!\n";
+            board[row][col] = HIT;
+            shipSunk = true;
+        } else {
+            std::cout << "Iska!\n";
+            board[row][col] = MISS;
+        }
+    }
+
+    if (shipSunk) {
+        std::cout << "Oyunu kazandınız!\n";
+    } else {
+        std::cout << "Deneme haklarınız tükendi. Gemiyi batıramadınız.\n";
+        printBoard(board, true); // Gemiyi göstermek için tahtayı tekrar bas
+        std::cout << "Gemiyi burada batırmalıydınız: " << char('A' + shipRow) << (shipCol + 1) << "\n";
+    }
+
+    return 0;
+}
